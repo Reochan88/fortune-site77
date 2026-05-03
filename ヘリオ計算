@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ヘリオ星座チェック</title>
+
+<style>
+  body {
+    background: radial-gradient(circle at top, #0a0f2c, #050816);
+    color: #d6ecff;
+    text-align: center;
+    font-family: "Hiragino Maru Gothic ProN", sans-serif;
+    margin-top: 50px;
+  }
+
+  h2 {
+    color: #8ec5ff;
+  }
+
+  input, button {
+    padding: 10px 14px;
+    margin: 8px;
+    border-radius: 12px;
+    border: none;
+  }
+
+  input {
+    background: #1b2a6b;
+    color: #d6ecff;
+  }
+
+  button {
+    background: linear-gradient(135deg, #4da6ff, #6bbcff);
+    color: white;
+    cursor: pointer;
+  }
+
+  #result {
+    margin-top: 25px;
+    font-size: 22px;
+    background: rgba(20, 40, 120, 0.3);
+    display: inline-block;
+    padding: 15px 25px;
+    border-radius: 15px;
+  }
+
+  .accent {
+    color: #ffd6ff;
+    font-weight: bold;
+  }
+</style>
+</head>
+
+<body>
+
+<h2>🌌 ヘリオ星座チェック</h2>
+
+<input type="date" id="date">
+<br>
+<button onclick="checkHelio()">ヘリオ計算</button>
+
+<div id="result"></div>
+
+<script>
+// 黄経 → 星座
+function getZodiacFromLongitude(lon) {
+  const signs = [
+    "牡羊座","牡牛座","双子座","蟹座","獅子座","乙女座",
+    "天秤座","蠍座","射手座","山羊座","水瓶座","魚座"
+  ];
+  return signs[Math.floor(lon / 30)];
+}
+
+// 太陽の黄経
+function getJulianDate(date) {
+  return date / 86400000 + 2440587.5;
+}
+
+function getSunLongitude(date) {
+  const jd = getJulianDate(date);
+  const T = (jd - 2451545.0) / 36525;
+
+  let L0 = 280.46646 + 36000.76983 * T;
+  L0 = L0 % 360;
+
+  let M = 357.52911 + 35999.05029 * T;
+  M = M % 360;
+
+  const Mrad = M * Math.PI / 180;
+
+  const C =
+    (1.914602 - 0.004817 * T) * Math.sin(Mrad) +
+    0.019993 * Math.sin(2 * Mrad) +
+    0.000289 * Math.sin(3 * Mrad);
+
+  const trueLongitude = L0 + C;
+
+  return (trueLongitude + 360) % 360;
+}
+
+// 実行
+function checkHelio() {
+  const input = document.getElementById("date").value;
+  if (!input) return;
+
+  const date = new Date(input);
+
+  const sunLon = getSunLongitude(date);
+  const helioLon = (sunLon + 180) % 360;
+  const helioSign = getZodiacFromLongitude(helioLon);
+
+  document.getElementById("result").innerHTML =
+    `<span class="accent">${helioSign}</span>`;
+}
+</script>
+
+</body>
+</html>
