@@ -1,68 +1,62 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>ヘリオ星座チェック</title>
-
+<title>星座判定デモ</title>
 <style>
   body {
-    background: radial-gradient(circle at top, #0a0f2c, #050816);
-    color: #d6ecff;
+    font-family: sans-serif;
     text-align: center;
-    font-family: "Hiragino Maru Gothic ProN", sans-serif;
     margin-top: 50px;
   }
-
-  h2 {
-    color: #8ec5ff;
-  }
-
   input, button {
-    padding: 10px 14px;
-    margin: 8px;
-    border-radius: 12px;
-    border: none;
-  }
-
-  input {
-    background: #1b2a6b;
-    color: #d6ecff;
-  }
-
-  button {
-    background: linear-gradient(135deg, #4da6ff, #6bbcff);
-    color: white;
-    cursor: pointer;
-  }
-
-  #result {
-    margin-top: 25px;
-    font-size: 22px;
-    background: rgba(20, 40, 120, 0.3);
-    display: inline-block;
-    padding: 15px 25px;
-    border-radius: 15px;
-  }
-
-  .accent {
-    color: #ffd6ff;
-    font-weight: bold;
+    padding: 8px;
+    margin: 5px;
   }
 </style>
 </head>
-
 <body>
 
-<h2>🌌 ヘリオ星座チェック</h2>
+<h2>星座チェック</h2>
 
 <input type="date" id="date">
-<br>
-<button onclick="checkHelio()">ヘリオ計算</button>
+<button onclick="checkSign()">判定</button>
 
-<div id="result"></div>
+<p id="result"></p>
 
-<!-- <script>
-// 黄経 → 星座
+<script>
+// ===== 通常の星座 =====
+function getZodiacSign(month, day) {
+  const signs = [
+    { sign: "山羊座", from: [12, 22], to: [1, 19] },
+    { sign: "水瓶座", from: [1, 20], to: [2, 18] },
+    { sign: "魚座", from: [2, 19], to: [3, 20] },
+    { sign: "牡羊座", from: [3, 21], to: [4, 19] },
+    { sign: "牡牛座", from: [4, 20], to: [5, 20] },
+    { sign: "双子座", from: [5, 21], to: [6, 21] },
+    { sign: "蟹座", from: [6, 22], to: [7, 22] },
+    { sign: "獅子座", from: [7, 23], to: [8, 22] },
+    { sign: "乙女座", from: [8, 23], to: [9, 22] },
+    { sign: "天秤座", from: [9, 23], to: [10, 23] },
+    { sign: "蠍座", from: [10, 24], to: [11, 22] },
+    { sign: "射手座", from: [11, 23], to: [12, 21] }
+  ];
+
+  for (let s of signs) {
+    const [fromMonth, fromDay] = s.from;
+    const [toMonth, toDay] = s.to;
+
+    if (
+      (month === fromMonth && day >= fromDay) ||
+      (month === toMonth && day <= toDay)
+    ) {
+      return s.sign;
+    }
+  }
+}
+
+// ===== 黄経 → 星座 =====
 function getZodiacFromLongitude(lon) {
   const signs = [
     "牡羊座","牡牛座","双子座","蟹座","獅子座","乙女座",
@@ -71,7 +65,7 @@ function getZodiacFromLongitude(lon) {
   return signs[Math.floor(lon / 30)];
 }
 
-// 太陽の黄経
+// ===== 太陽の黄経（本物）=====
 function getJulianDate(date) {
   return date / 86400000 + 2440587.5;
 }
@@ -98,21 +92,30 @@ function getSunLongitude(date) {
   return (trueLongitude + 360) % 360;
 }
 
-// 実行
-function checkHelio() {
+// ===== 実行 =====
+function checkSign() {
   const input = document.getElementById("date").value;
   if (!input) return;
 
-  const date = new Date(input);
+  const d = new Date(input);
+  const month = d.getMonth() + 1;
+  const day = d.getDate();
 
-  const sunLon = getSunLongitude(date);
+  // 通常星座
+  const normalSign = getZodiacSign(month, day);
+
+  // 太陽黄経
+  const sunLon = getSunLongitude(d);
+
+  // ★ヘリオ（反転）
   const helioLon = (sunLon + 180) % 360;
   const helioSign = getZodiacFromLongitude(helioLon);
 
   document.getElementById("result").innerHTML =
-    `<span class="accent">${helioSign}</span>`;
+    `あなたの星座は「${normalSign}」です<br>
+     あなたのヘリオは「${helioSign}」です！！`;
 }
-</script> -->
+</script>
 
 </body>
 </html>
